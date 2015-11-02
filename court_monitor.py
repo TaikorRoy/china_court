@@ -11,6 +11,6 @@ while True:
     mysql = MySQLUpdater()
     existed = mysql.pull_records()
     for page in pages:
-        url_list_fetch(page, mysql, existed)
+        url_list_fetch(page, existed)
     mysql.clean_up()
     time.sleep(time_span)

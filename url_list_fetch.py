@@ -29,8 +29,6 @@ def url_list_fetch(starting_page_num, existed, db = None):
         try:
             if url not in existed:
                 crawl_and_parse(url, db)
-        except:
+        except:  # if url is not new ( is a member of existed list), then print msg
             print(url)
-            print("Problem Found !")
-            with codecs.open("failed_urls_log", "a", encoding="utf8") as fl:
-                fl.write(url)
+            print("This url is already in the database")
