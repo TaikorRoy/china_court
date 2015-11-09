@@ -8,6 +8,7 @@ Created on Tue Aug 25 09:57:13 2015
 import requests
 import re 
 from url_content_fetch import crawl_and_parse
+from format_converter import get_url_id
 import codecs
 
 
@@ -27,8 +28,11 @@ def url_list_fetch(starting_page_num, existed, db = None):
         
     for url in postUrl:
         try:
-            if url not in existed:
+            id = get_url_id(url)
+            if id not in existed:
                 crawl_and_parse(url, db)
-        except:  # if url is not new ( is a member of existed list), then print msg
+            else:
+                pass
+        except:
             print(url)
-            print("This url is already in the database")
+            print("Error")

@@ -9,9 +9,11 @@ import re
 import MySQLdb
 import codecs
 from format_converter import cn2digits_master
-from format_converter import cn2date
+from format_converter import date_handle
 from format_converter import handle_punctuations
+from format_converter import delete_none
 from mysql_updater_baseClass import MySQLUpdater
+from lib import get_formated_time
 import json
 
 
@@ -114,31 +116,76 @@ def crawl_and_parse(url, db = None):
     h = re.sub(u"公司）",u"公司", h)
     k = re.sub(u"为|是", "", k)
 
-    j = cn2date(j)
-    k = cn2date(k)
+    a = date_handle(a)
+    m = date_handle(a)
+    n = date_handle(a)
+    j = date_handle(j)
+    k = date_handle(k)
+
     e = handle_punctuations(e)
     f = cn2digits_master(f)
     
     info = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, t]
-    for info_item in range(len(info)):
-        if info[info_item] == u"空":
-            info[info_item] = None
-    if db:
-        sql = r"INSERT INTO billloss (postId, postUrl, postYmd, postCorp, postCourt, postContent, billsId, billsAmount, billsCorp, billsGain, billsPay, billsYmdStart, billsYmdEnd, postSection, pubDate, uploadDate) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (info[14], url, info[0],info[1],info[2],info[3],info[4],info[5],info[6],info[7],info[8],info[9],info[10],info[11],info[12],info[13])
-        print(sql)
-        db.query(sql)
-        print("Python MySQL update OK")
-    else:
-        court_data = {"postId": info[14], "postUrl": url, "postYmd": info[0], "postCorp": info[1], "postCourt": info[2], "postContent": info[3], "billsId": info[4], "billsAmount": info[5], "billsCorp": info[6], "billsGain": info[7], "billsPay": info[8], "billsYmdStart": info[9],"billsYmdEnd": info[10], "postSection": info[11], "pubDate": info[12], "uploadDate": info[13]}
 
-        api_url = "http://localhost/court_data_handler.php"
-        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-        r = requests.post(api_url, data=json.dumps(court_data, ensure_ascii=True), headers=headers)
-        print(r.text)
+    billNo = info[4]
+    if billNo != u"空":
+        for info_item in range(len(info)):
+            if info[info_item] == u"空":
+                info[info_item] = None
+
+        if info[5]:
+            info[5] = float(info[5])
+
+        if db:
+            sql = r"INSERT INTO billloss (postId, postUrl, postYmd, postCorp, postCourt, postContent, billsId, billsAmount, billsCorp, billsGain, billsPay, billsYmdStart, billsYmdEnd, postSection, pubDate, uploadDate) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (info[14], url, info[0],info[1],info[2],info[3],info[4],info[5],info[6],info[7],info[8],info[9],info[10],info[11],info[12],info[13])
+            print(sql)
+            db.query(sql)
+            print("Python MySQL update OK")
+        else:
+            current_formated_time = get_formated_time()
+            billloss_dict = {
+                    "billNo": info[4],
+                    "possId": info[14],
+                    "possUrl": url,
+                    "possDate": info[0],
+                    "company": info[1],
+                    "court": info[2],
+                    "content": info[3],
+                    "faceAmount": info[5],
+                    "payerCompany": info[6],
+                    "payerBank": info[7],
+                    "payeeCompany": info[8],
+                    "issueDate": info[9],
+                    "dueDate": info[10],
+                    "postSection": info[11],
+                    "status": u"状态",
+                    "recorder": u"操作员",
+                    "remark": u"无",
+                    "createTime": current_formated_time,
+                    # "createTime": "2015-08-28 01:30:00", for debug use only
+                    "updateTime": current_formated_time
+                    }
+
+            billloss_dict = delete_none(billloss_dict)
+            # delete none value keys, ensure all date time field has value
+
+            court_data = {
+                             "head": {
+                                 "comeFrom": 1
+                             },
+                "sign": "6cd7a0cec3ba9bbab2f95a4570aa54a5",
+                "args": {
+                    "billLoss": billloss_dict
+                }
+            }
+
+            api_url = "http://taomandev.piaojiaowang.com/PJWServices/bill/addBillLoss"
+            headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+            json_str = json.dumps(court_data, ensure_ascii=True)
+            r = requests.post(api_url, data=json_str, headers=headers)
+            print(r.text)
 
 if __name__ == "__main__":
 
     mysql = MySQLUpdater()
-    crawl_and_parse(r"http://www.live.chinacourt.org/fygg/detail/2015/03/id/2584183.shtml", db = mysql)
-
-    # crawl_and_parse(r"http://www.live.chinacourt.org/fygg/detail/2015/03/id/2580030.shtml")
+    crawl_and_parse(r"http://www.live.chinacourt.org/fygg/detail/2015/06/id/2736426.shtml", db = None)

@@ -2,6 +2,7 @@
 #common_used_numerals={u'零':0,u'一':1,u'二':2,u'三':3,u'四':4,u'五':5,u'六':6,u'七':7,u'八':8,u'九':9,u'十':10,u'百':100,u'千':1000,u'万':10000,u'亿':100000000}
 
 import string
+import re
 
 def cn2digits_master(uchars_cn):
     uchars_cn = uchars_cn.replace(u",", u"")
@@ -58,13 +59,26 @@ def is_numeric(my_str):
             break
     return flag
 
-def cn2date(my_str):
+
+def date_handle(my_str):
     if my_str == u"空":
-        return u"空"
+        return None
     my_str = my_str.replace(u"年", u"-")
     my_str = my_str.replace(u"月", u"-")
     my_str = my_str.replace(u"日", u"")
+    my_str = date_formating(my_str)
     return my_str
+
+
+def date_formating(my_str):
+    # "2015-08-28 01:30:00"
+    pattern = "\d{4}-\d{1,2}-\d{1,2}"
+    match = re.findall(pattern, my_str)
+    if len(match) > 0:
+        data = match[0] + " 00:00:00"
+    else:
+        data = None
+    return data
 
 def handle_punctuations(obj_str):
     del_str = u"\n\r\t  ~`!@#$%^&*()_+-=	{}|[]\\:\";\'<>?,./~·！@#￥%……&*（）——+-=【】、{}|；‘：“，。、《》？	"
@@ -72,8 +86,26 @@ def handle_punctuations(obj_str):
         obj_str = obj_str.replace(char, u" ")
     return obj_str
 
+
+def delete_none(my_dict):
+    keys = my_dict.keys()
+    for key in keys:
+        if not my_dict[key]:   # if value == None, then delete this key
+            del my_dict[key]
+    return my_dict
+
+
+def get_url_id(url):
+    url = "http://www.live.chinacourt.org/fygg/detail/2015/11/id/2975360.shtml"
+    pattern = r"id/(.+?)\.shtml"
+    result = re.findall(pattern, url)
+    return result[0]
+
 if __name__ == "__main__":
     print(cn2digits_master(u'28.56万'))
     print(cn2digits_master(u'20万'))
     print(cn2digits_master(u'200000'))
     # print(is_numeric('111哇'))
+
+    url = "http://www.live.chinacourt.org/fygg/detail/2015/11/id/2975360.shtml"
+    print(get_url_id(url))

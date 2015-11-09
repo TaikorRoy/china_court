@@ -4,7 +4,8 @@ __author__ = 'Taikor'
 import MySQLdb
 import time
 import codecs
-
+import requests
+import json
 
 class MySQLUpdater(object):
     HOST = "localhost"
@@ -45,6 +46,15 @@ class MySQLUpdater(object):
         for item in list_buffer:
             urls.append(item[0])
         return urls
+
+    def pull_records_remote(self):
+        api_url = "http://taomandev.piaojiaowang.com/PJWServices/bill/addBillLoss"
+        headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+        court_data = {}
+        json_str = json.dumps(court_data, ensure_ascii=True)
+        r = requests.post(api_url, data=json_str, headers=headers)
+        data = r.text
+        # To Do: Requests Details
 
     def clean_up(self):
         self.db.close()
