@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-#common_used_numerals={u'零':0,u'一':1,u'二':2,u'三':3,u'四':4,u'五':5,u'六':6,u'七':7,u'八':8,u'九':9,u'十':10,u'百':100,u'千':1000,u'万':10000,u'亿':100000000}
 
-import string
 import re
+
 
 def cn2digits_master(uchars_cn):
     uchars_cn = uchars_cn.replace(u",", u"")
@@ -96,7 +95,6 @@ def delete_none(my_dict):
 
 
 def get_url_id(url):
-    url = "http://www.live.chinacourt.org/fygg/detail/2015/11/id/2975360.shtml"
     pattern = r"id/(.+?)\.shtml"
     result = re.findall(pattern, url)
     return result[0]

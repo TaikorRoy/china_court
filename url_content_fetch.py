@@ -187,5 +187,5 @@ def crawl_and_parse(url, db = None):
 
 if __name__ == "__main__":
 
-    mysql = MySQLUpdater()
+    # mysql = MySQLUpdater()
     crawl_and_parse(r"http://www.live.chinacourt.org/fygg/detail/2015/06/id/2736426.shtml", db = None)

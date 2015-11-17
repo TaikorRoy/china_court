@@ -7,13 +7,18 @@ from check_remote_mysql import check_remote
 
 time_span = 1*3600
 
-pages = [1,2,3]
+pages = [1, 2, 3, 4, 5]
 while True:
-    mysql = MySQLUpdater()
+    # mysql = MySQLUpdater()
     # existed = mysql.pull_records()
-    existed = check_remote(100)
+    try:
+        existed = check_remote(100)
+    except:
+        print("Remote check-court-record API unavailable")
+        time.sleep(300)
+        continue
 
     for page in pages:
         url_list_fetch(page, existed)
-    mysql.clean_up()
+    # mysql.clean_up()
     time.sleep(time_span)
